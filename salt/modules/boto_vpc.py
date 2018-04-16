@@ -259,6 +259,9 @@ def _create_resource(resource, name=None, tags=None, region=None, key=None,
             if isinstance(r, bool):
                 return {'created': True}
             else:
+                while not resource_exists(resource, resource_id=r.id):
+                    log.info('Waiting for %s with id %s to be competed', resource, r.id)
+                    time.sleep(5)
                 log.info('A %s with id %s was created', resource, r.id)
                 _maybe_set_name_tag(name, r)
                 _maybe_set_tags(tags, r)
