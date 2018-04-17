@@ -1377,6 +1377,11 @@ def create_nat_gateway(subnet_id=None,
 
         # Have to go to boto3 to create NAT gateway
         r = conn3.create_nat_gateway(SubnetId=subnet_id, AllocationId=allocation_id)
+        while gatewaystate != 'available':
+            gatewaystate = describe_nat_gateways(nat_gateway_id=r['NatGateway']['NatGatewayId'], region=region,
+                                                 key=key, keyid=keyid, profile=profile)[0]['State']
+            log.info("Gateway id %s is still in a %s state", r['NatGateway']['NatGatewayId'], gatewaystate)
+            time.sleep(5)
         return {'created': True, 'id': r.get('NatGateway', {}).get('NatGatewayId')}
     except BotoServerError as e:
         return {'created': False, 'error': salt.utils.boto.get_error(e)}
